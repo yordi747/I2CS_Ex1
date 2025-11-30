@@ -5,10 +5,10 @@ The goal is to implement various functions for analyzing and working with polyno
 
 The project demonstrates my understanding of:
 
-Arrays
-Functions
-Recursive methods
-Polynomial operations
+Arrays,
+Functions,
+Recursive methods,
+Polynomial operations,
 Implemented Functions
 
 1. f
