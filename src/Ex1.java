@@ -72,22 +72,25 @@ public class Ex1 {
      * @return an array of doubles representing the coefficients of the polynom.
      */
     public static double[] PolynomFromPoints(double[] xx, double[] yy) {
+        if (xx == null || yy == null || xx.length != yy.length) return null;
+
         if (xx.length == 2) {
-            double a = (yy[1] - yy[0]) / (xx[1] - xx[0]);
-            double b = yy[0] - a * xx[0];
-            return new double[]{b, a};
+            if (xx[1] - xx[0] == 0) return null;
+            double b = (yy[1] - yy[0]) / (xx[1] - xx[0]);
+            double c = yy[0] - b * xx[0];
+            return new double[]{c, b};
         }
 
         if (xx.length == 3) {
-            double x1 = xx[0], y1 = yy[0];
-            double x2 = xx[1], y2 = yy[1];
-            double x3 = xx[2], y3 = yy[2];
+            double x1 = xx[0], x2 = xx[1], x3 = xx[2];
+            double y1 = yy[0], y2 = yy[1], y3 = yy[2];
 
-            double a = ((y3 - y1) - (y2 - y1) * (x3 - x1) / (x2 - x1)) /
-                    ((x3*x3 - x1*x1) - (x2*x2 - x1*x1) * (x3 - x1) / (x2 - x1));
+            double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+            if (denom == 0) return null;
 
-            double b = (y2 - y1 - a*(x2*x2 - x1*x1)) / (x2 - x1);
-            double c = y1 - a*x1*x1 - b*x1;
+            double a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+            double b = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
+            double c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
             return new double[]{c, b, a};
         }
@@ -121,6 +124,7 @@ public class Ex1 {
 
         return true;
     }
+
     /**
      * Computes a String representing the polynomial function.
      * For example the array {2,0,3.1,-1.2} will be presented as the following String  "-1.2x^3 +3.1x^2 +2.0"
@@ -164,11 +168,26 @@ public class Ex1 {
      * @return an x value (x1<=x<=x2) for which |p1(x) - p2(x)| < eps.
      */
     public static double sameValue(double[] p1, double[] p2, double x1, double x2, double eps) {
-        for (double x = x1; x <= x2; x += eps) {
-            if (Math.abs(f(p1, x) - f(p2, x)) < eps)
-                return x;
+        double f1 = f(p1, x1) - f(p2, x1);
+        double f2 = f(p1, x2) - f(p2, x2);
+
+        if (f1 * f2 > 0) return -1;
+
+        while (Math.abs(x2 - x1) > eps) {
+            double mid = (x1 + x2) / 2;
+            double fm = f(p1, mid) - f(p2, mid);
+
+            if (Math.abs(fm) < eps) return mid;
+
+            if (fm * f1 <= 0) {
+                x2 = mid;
+                f2 = fm;
+            } else {
+                x1 = mid;
+                f1 = fm;
+            }
         }
-        return -1;
+        return (x1 + x2) / 2;
     }
 
     /**
@@ -188,8 +207,9 @@ public class Ex1 {
         double dx = (x2 - x1) / numberOfSegments, len = 0, x = x1, y = f(p, x);
         for (int i = 0; i < numberOfSegments; i++) {
             double x2p = x + dx, y2p = f(p, x2p);
-            len += Math.sqrt((x2p-x)*(x2p-x) + (y2p-y)*(y2p-y));
-            x = x2p; y = y2p;
+            len += Math.sqrt((x2p - x) * (x2p - x) + (y2p - y) * (y2p - y));
+            x = x2p;
+            y = y2p;
         }
         return len;
     }
@@ -208,52 +228,34 @@ public class Ex1 {
      * @return the approximated area between the two polynomial functions within the [x1,x2] range.
      */
     public static double area(double[] p1, double[] p2, double x1, double x2, int numberOfTrapezoid) {
+        if (p1 == null || p2 == null || numberOfTrapezoid <= 0) return 0.0;
         if (x1 == x2) return 0.0;
+
+        // לוודא ש-x1 קטן מ-x2
         if (x2 < x1) {
             double t = x1;
             x1 = x2;
             x2 = t;
         }
-        double s1 = f(p1, x1) - f(p2, x1);
-        double s2 = f(p1, x2) - f(p2, x2);
 
-        if (s1 * s2 > 0 || Math.abs(s1) < EPS || Math.abs(s2) < EPS) {
-            double[] d = polyDiff(p1, p2);
-            double[] id = integratePoly(d);
-            double v = f(id, x2) - f(id, x1);
-            if (v < 0) v = -v;
-            return v;
-        } else {
-            double xm = sameValue(p1, p2, x1, x2, EPS);
-            if (xm <= x1 + EPS || xm >= x2 - EPS) {
-                double[] d = polyDiff(p1, p2);
-                double[] id = integratePoly(d);
-                double v = f(id, x2) - f(id, x1);
-                if (v < 0) v = -v;
-                return v;
-            }
-            return area(p1, p2, x1, xm, numberOfTrapezoid) + area(p1, p2, xm, x2, numberOfTrapezoid);
-        }
-    }
+        double dx = (x2 - x1) / numberOfTrapezoid;
+        double sum = 0.0;
 
-    private static double[] polyDiff(double[] a, double[] b) {
-        int n = Math.max(a.length, b.length);
-        double[] r = new double[n];
-        for (int i = 0; i < n; i++) {
-            double aa = i < a.length ? a[i] : 0.0;
-            double bb = i < b.length ? b[i] : 0.0;
-            r[i] = aa - bb;
-        }
-        return r;
-    }
+        double x = x1;
+        double yDiff = Math.abs(f(p1, x) - f(p2, x));
 
-    private static double[] integratePoly(double[] p) {
-        double[] r = new double[p.length + 1];
-        r[0] = 0.0;
-        for (int i = 0; i < p.length; i++) {
-            r[i + 1] = p[i] / (i + 1);
+        for (int i = 0; i < numberOfTrapezoid; i++) {
+            double xNext = x + dx;
+            double yDiffNext = Math.abs(f(p1, xNext) - f(p2, xNext));
+
+            // נוסחת טרפז: (גובה1 + גובה2) * בסיס / 2
+            sum += (yDiff + yDiffNext) * dx / 2.0;
+
+            x = xNext;
+            yDiff = yDiffNext;
         }
-        return r;
+
+        return sum;
     }
 
     /**
@@ -279,20 +281,20 @@ public class Ex1 {
         double[] ans = new double[max + 1];
 
         for (String s : t) {
-            if (s.equals("")) { }
-            else if (s.contains("x")) {
+            if (s.equals("")) {
+            } else if (s.contains("x")) {
                 int xPos = s.indexOf("x");
                 String c = s.substring(0, xPos);
                 double coef = c.equals("") ? 1 : (c.equals("-") ? -1 : Double.parseDouble(c));
                 int pow = s.contains("^") ? Integer.parseInt(s.substring(s.indexOf("^") + 1)) : 1;
                 ans[pow] += coef;
-            }
-            else {
+            } else {
                 ans[0] += Double.parseDouble(s);
             }
         }
         return ans;
     }
+
     /**
      * This function computes the polynomial function which is the sum of two polynomial functions (p1,p2)
      *
@@ -321,34 +323,38 @@ public class Ex1 {
             ans[i] = j + m;
         }
 
-		return ans;
-	}
-	/**
-	 * This function computes the polynomial function which is the multiplication of two polynoms (p1,p2)
-	 * @param p1
-	 * @param p2
-	 * @return
-	 */
-	public static double[] mul(double[] p1, double[] p2) {
+        return ans;
+    }
+
+    /**
+     * This function computes the polynomial function which is the multiplication of two polynoms (p1,p2)
+     *
+     * @param p1
+     * @param p2
+     * @return
+     */
+    public static double[] mul(double[] p1, double[] p2) {
 
         int len1 = p1.length;
         int len2 = p2.length;
         double[] ans = new double[p1.length + p2.length - 1];
 
-        for (int i = 0; i < p1.length ; i++) {
+        for (int i = 0; i < p1.length; i++) {
             for (int j = 0; j < p2.length; j++) {
 
                 ans[i + j] += p1[i] * p2[j];
             }
         }
 
-		return ans;
-	}
-	/**
-	 * This function computes the derivative of the p0 polynomial function.
-	 * @param po
-	 * @return
-	 */
+        return ans;
+    }
+
+    /**
+     * This function computes the derivative of the p0 polynomial function.
+     *
+     * @param po
+     * @return
+     */
     public static double[] derivative(double[] po) {
         if (po == null || po.length <= 1) {
             return new double[]{0.0};
@@ -359,4 +365,12 @@ public class Ex1 {
         }
         return derivate;
     }
+
+    public static double[] mp(double current, int pad, double[] p) {
+        double[] m = new double[p.length + pad];
+        for (int j = 0; j < p.length; j++) {
+            m[j + pad] = current * p[j];
+        }
+        return m;
     }
+}
