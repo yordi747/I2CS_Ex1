@@ -107,29 +107,18 @@ public class Ex1 {
         if (p1 == p2) return true;
         if (p1 == null || p2 == null) return false;
 
-        int last1 = -1;
-        for (int i = p1.length - 1; i >= 0; i--) {
-            if (p1[i] != 0.0) {
-                last1 = i;
-                break;
-            }
-        }
+        int last1 = p1.length - 1;
+        while (last1 >= 0 && Math.abs(p1[last1]) <= EPS) last1--;
 
-        int last2 = -1;
-        for (int i = p2.length - 1; i >= 0; i--) {
-            if (p2[i] != 0.0) {
-                last2 = i;
-                break;
-            }
-        }
+        int last2 = p2.length - 1;
+        while (last2 >= 0 && Math.abs(p2[last2]) <= EPS) last2--;
 
-        int len1 = last1 + 1;
-        int len2 = last2 + 1;
-        if (len1 != len2) return false;
+        if (last1 != last2) return false;
 
-        for (int i = 0; i < len1; i++) {
+        for (int i = 0; i <= last1; i++) {
             if (Math.abs(p1[i] - p2[i]) > EPS) return false;
         }
+
         return true;
     }
     /**
