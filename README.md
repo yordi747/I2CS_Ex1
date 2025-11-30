@@ -50,3 +50,8 @@ Computes the derivative of a polynomial.
 
 13. mp()
 Multiplies the polynomial by a scalar.
+
+
+
+
+
