@@ -248,7 +248,6 @@ public class Ex1 {
             double xNext = x + dx;
             double yDiffNext = Math.abs(f(p1, xNext) - f(p2, xNext));
 
-            // נוסחת טרפז: (גובה1 + גובה2) * בסיס / 2
             sum += (yDiff + yDiffNext) * dx / 2.0;
 
             x = xNext;
