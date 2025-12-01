@@ -232,7 +232,6 @@ public class Ex1 {
         if (p1 == null || p2 == null || numberOfTrapezoid <= 0) return 0.0;
         if (x1 == x2) return 0.0;
 
-        // לוודא ש-x1 קטן מ-x2
         if (x2 < x1) {
             double t = x1;
             x1 = x2;
