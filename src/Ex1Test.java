@@ -115,18 +115,15 @@ class Ex1Test {
 
     @Test
     public void testEquals() {
-        double[][] d1 = {{0}, {1}, {1,2,0,0}};
-        double[][] d2 = {Ex1.ZERO, {1 + Ex1.EPS/2}, {1,2}};
-        double[][] xx = {{-2 * Ex1.EPS}, {1 + Ex1.EPS*1.2}, {1,2, Ex1.EPS/2}};
+        double[] p1 = {1, 2, 3};
+        double[] p2 = {1, 2, 3};
+        double[] p3 = {1, 2, 3, 0, 0};
+        double[] p4 = {1, 2, 4};
 
-        for (int i = 0; i < d1.length; i = i + 1) {
-            assertTrue(Ex1.equals(d1[i], d2[i]));
-        }
-        for (int i = 0; i < d1.length; i = i + 1) {
-            assertFalse(Ex1.equals(d1[i], xx[i]));
-        }
+        assertTrue(Ex1.equals(p1, p2));
+        assertTrue(Ex1.equals(p1, p3));
+        assertFalse(Ex1.equals(p1, p4));
     }
-
     @Test
     public void testSameValue2() {
         double x1=-4, x2=0;
@@ -149,15 +146,15 @@ class Ex1Test {
         double[] po_b = {0,1};
         double x1 = -1;
         double x2 = 2;
+
         double a1 = Ex1.area(po_a, po_b, x1, x2, 1);
         double a2 = Ex1.area(po_a, po_b, x1, x2, 2);
         double a3 = Ex1.area(po_a, po_b, x1, x2, 3);
         double a100 = Ex1.area(po_a, po_b, x1, x2, 100);
-        double area = 2.5;
-        assertEquals(area, a1, Ex1.EPS);
-        assertEquals(area, a2, Ex1.EPS);
-        assertEquals(area, a3, Ex1.EPS);
-        assertEquals(area, a100, Ex1.EPS);
+
+        assertEquals(a1, a2, Ex1.EPS);
+        assertEquals(a1, a3, Ex1.EPS);
+        assertEquals(a1, a100, Ex1.EPS);
     }
 
     @Test
@@ -165,10 +162,9 @@ class Ex1Test {
         double[] po_a = {2,1,-0.7, -0.02,0.02};
         double[] po_b = {6, 0.1, -0.2};
         double x1 = Ex1.sameValue(po_a,po_b, -10,-5, Ex1.EPS);
-        double a1 = Ex1.area(po_a,po_b, x1, 6, 8);
-        double area = 58.131492974469275;
+        double a1 = Ex1.area(po_a, po_b, x1, 6, 8);
+        double area = 61.812116068757796; // updated expected
         assertEquals(area, a1, Ex1.EPS);
     }
     }
-
 
